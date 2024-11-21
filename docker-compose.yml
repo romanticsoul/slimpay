@@ -1,4 +1,20 @@
 services:
+  traefik:
+    container_name: traefik
+    image: traefik
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - 80:80
+      - 8080:8080
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - my_network
+
   frontend:
     container_name: frontend
     build:
@@ -7,16 +23,44 @@ services:
       # args:
       #   ENV_VARIABLE: ${ENV_VARIABLE}
       #   NEXT_PUBLIC_ENV_VARIABLE: ${NEXT_PUBLIC_ENV_VARIABLE}
-    restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.services.frontend.loadbalancer.server.port=3000"
     ports:
       - 3000:3000
+    restart: always
     networks:
       - my_network
 
-  # Add more containers below (nginx, postgres, etc.)
+  postgres:
+    container_name: postgres
+    image: postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+    networks:
+      - my_network
 
-# Define a network, which allows containers to communicate
-# with each other, by using their container name as a hostname
+  adminer:
+    container_name: adminer
+    image: adminer
+    restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.adminer.rule=Host(`adminer.${DOMAIN}`)"
+      - "traefik.http.services.adminer.loadbalancer.server.port=8080"
+    networks:
+      - my_network
+
 networks:
   my_network:
     external: true
+
+volumes:
+  postgres_data:
+    driver: local
