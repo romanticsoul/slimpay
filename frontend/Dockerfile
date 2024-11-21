@@ -24,6 +24,7 @@ COPY tsconfig.json .
 ENV NEXT_TELEMETRY_DISABLED 1
 
 # Note: Don't expose ports here, Compose will handle that for us
+EXPOSE 3000
 
 # Build Next.js based on the preferred package manager
 RUN npm run build

@@ -17,7 +17,6 @@ COPY tsconfig.json .
 ENV NEXT_TELEMETRY_DISABLED 1
 
 # Note: Don't expose ports here, Compose will handle that for us
-EXPOSE 3000
 
 # Start Next.js in development mode based on the preferred package manager
 CMD \
