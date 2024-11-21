@@ -1,20 +1,4 @@
 services:
-  traefik:
-    container_name: traefik
-    image: traefik
-    command:
-      - "--api.insecure=true"
-      - "--providers.docker=true"
-      - "--entrypoints.web.address=:80"
-    ports:
-      - 80:80
-      - 8080:8080
-    restart: always
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    networks:
-      - my_network
-
   frontend:
     container_name: frontend
     build:
@@ -23,12 +7,8 @@ services:
       # args:
       #   ENV_VARIABLE: ${ENV_VARIABLE}
       #   NEXT_PUBLIC_ENV_VARIABLE: ${NEXT_PUBLIC_ENV_VARIABLE}
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.frontend.rule=Host(`${DOMAIN}`)"
-      - "traefik.http.services.frontend.loadbalancer.server.port=3000"
     ports:
-      - 3000:3000
+      - 3000:80
     restart: always
     networks:
       - my_network
@@ -50,10 +30,6 @@ services:
     container_name: adminer
     image: adminer
     restart: always
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.adminer.rule=Host(`adminer.${DOMAIN}`)"
-      - "traefik.http.services.adminer.loadbalancer.server.port=8080"
     networks:
       - my_network
 
